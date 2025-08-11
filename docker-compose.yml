@@ -1,0 +1,254 @@
+version: '3.8'
+
+services:
+  # ==========================================
+  # BASE DE DONNÉES MYSQL 8.0
+  # ==========================================
+  mysql:
+    image: mysql:8.0
+    container_name: onlyroll_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./docker/mysql/conf.d:/etc/mysql/conf.d:ro
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    networks:
+      - onlyroll-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "${MYSQL_USER}", "-p${MYSQL_PASSWORD}"]
+      timeout: 20s
+      retries: 10
+
+  # ==========================================
+  # REDIS POUR CACHE ET SESSIONS
+  # ==========================================
+  redis:
+    image: redis:7-alpine
+    container_name: onlyroll_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - onlyroll-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      timeout: 3s
+      retries: 5
+
+  # ==========================================
+  # BACKEND SYMFONY 6+
+  # ==========================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: ../docker/backend/Dockerfile
+    container_name: onlyroll_backend
+    environment:
+      # Symfony Environment
+      APP_ENV: ${APP_ENV:-dev}
+      APP_SECRET: ${JWT_SECRET_KEY}
+      
+      # Database
+      DATABASE_URL: mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@mysql:3306/${MYSQL_DATABASE}?serverVersion=8.0&charset=utf8mb4
+      
+      # Redis
+      REDIS_URL: redis://redis:6379
+      
+      # JWT Configuration
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      JWT_PASSPHRASE: ${JWT_PASSPHRASE}
+      
+      # CORS
+      CORS_ALLOW_ORIGIN: ${FRONTEND_URL}
+      
+      # PHP Configuration
+      PHP_IDE_CONFIG: "serverName=onlyroll-backend"
+    volumes:
+      - ./backend:/var/www/app
+      - backend_vendor:/var/www/app/vendor
+      - backend_var:/var/www/app/var
+    ports:
+      - "8000:8000"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - onlyroll-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # ==========================================
+  # WEBSOCKET SERVER (TypeScript)
+  # ==========================================
+  websocket:
+    build:
+      context: ./websocket-server
+      dockerfile: ../docker/websocket/Dockerfile
+    container_name: onlyroll_websocket
+    environment:
+      # Node Environment
+      NODE_ENV: ${NODE_ENV:-development}
+      
+      # Redis Connection
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_URL: redis://redis:6379
+      
+      # JWT
+      JWT_SECRET: ${JWT_SECRET_KEY}
+      
+      # Backend Communication
+      BACKEND_URL: http://backend:8000
+      BACKEND_API_URL: http://backend:8000/api
+      
+      # Server Configuration
+      PORT: 3001
+      HOST: 0.0.0.0
+      
+      # CORS
+      CORS_ORIGIN: ${FRONTEND_URL}
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./websocket-server:/app
+      - websocket_modules:/app/node_modules
+      - ./websocket-server/dist:/app/dist
+    depends_on:
+      redis:
+        condition: service_healthy
+      backend:
+        condition: service_healthy
+    networks:
+      - onlyroll-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # ==========================================
+  # FRONTEND VUE.JS 3 + TYPESCRIPT
+  # ==========================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ../docker/frontend/Dockerfile
+    container_name: onlyroll_frontend
+    environment:
+      # Vite Development Server
+      VITE_HOST: 0.0.0.0
+      VITE_PORT: 3000
+      
+      # Application URLs
+      VITE_API_URL: ${API_URL:-http://localhost:8000/api}
+      VITE_WS_URL: ${WS_URL:-ws://localhost:3001}
+      VITE_BACKEND_URL: http://localhost:8000
+      
+      # Environment
+      VITE_APP_ENV: ${NODE_ENV:-development}
+      VITE_APP_NAME: "OnlyRoll VTT"
+      VITE_APP_VERSION: "1.0.0"
+      
+      # Development
+      NODE_ENV: ${NODE_ENV:-development}
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - frontend_modules:/app/node_modules
+    networks:
+      - onlyroll-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # ==========================================
+  # NGINX REVERSE PROXY
+  # ==========================================
+  nginx:
+    build:
+      context: ./docker/nginx
+      dockerfile: Dockerfile
+    container_name: onlyroll_nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      # Logs nginx
+      - nginx_logs:/var/log/nginx
+      # Certificats SSL (pour plus tard)
+      - ./docker/nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      backend:
+        condition: service_healthy
+      frontend:
+        condition: service_healthy
+      websocket:
+        condition: service_healthy
+    networks:
+      - onlyroll-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      timeout: 5s
+      retries: 3
+
+# ==========================================
+# VOLUMES PERSISTANTS
+# ==========================================
+volumes:
+  # Base de données
+  mysql_data:
+    driver: local
+  
+  # Cache Redis
+  redis_data:
+    driver: local
+  
+  # Dépendances backend (évite les re-installations)
+  backend_vendor:
+    driver: local
+  
+  # Cache et logs backend
+  backend_var:
+    driver: local
+  
+  # Dépendances frontend (évite les re-installations)
+  frontend_modules:
+    driver: local
+  
+  # Dépendances websocket (évite les re-installations)
+  websocket_modules:
+    driver: local
+  
+  # Logs nginx
+  nginx_logs:
+    driver: local
+
+# ==========================================
+# RÉSEAU INTERNE
+# ==========================================
+networks:
+  onlyroll-network:
+    driver: bridge
+    name: onlyroll_network

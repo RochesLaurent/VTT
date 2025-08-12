@@ -292,13 +292,31 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # AJOUT : Installer les outils nécessaires
+      - name: Install MySQL and Redis clients
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y mysql-client redis-tools
+
       - name: Test full stack connectivity
         run: |
           echo "Testing MySQL connection..."
-          mysql -h 127.0.0.1 -P 3306 -u onlyroll_user -pTestPassword123! -e "SELECT 1"
+          mysql -h 127.0.0.1 -P 3306 -u onlyroll_user -pTestPassword123! -e "SELECT 1" 2>/dev/null
+          if [ $? -eq 0 ]; then
+            echo "MySQL connection successful"
+          else
+            echo "MySQL connection failed"
+            exit 1
+          fi
           
           echo "Testing Redis connection..."
           redis-cli -h 127.0.0.1 -p 6379 ping
+          if [ $? -eq 0 ]; then
+            echo "Redis connection successful"
+          else
+            echo "Redis connection failed"
+            exit 1
+          fi
 
   # ======================
   # DOCKER BUILD

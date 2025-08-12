@@ -51,6 +51,20 @@ jobs:
           coverage: xdebug
           tools: composer:2.8.9
 
+      - name: Create .env file for Symfony
+        run: |
+          cat > .env << EOF
+          APP_ENV=test
+          APP_SECRET=test-app-secret-for-ci-only
+          DATABASE_URL=mysql://onlyroll_user:TestPassword123!@127.0.0.1:3306/onlyroll_test
+          MESSENGER_TRANSPORT_DSN=doctrine://default?auto_setup=0
+          JWT_SECRET_KEY=test-secret-key-for-ci-only
+          JWT_PUBLIC_KEY=test-public-key-for-ci-only
+          JWT_PASSPHRASE=TestPassphrase123!
+          CORS_ALLOW_ORIGIN='^https?://(localhost|127\.0\.0\.1)(:[0-9]+)?$'
+          EOF
+        working-directory: backend
+
       - name: Get Composer Cache Directory
         id: composer-cache
         shell: bash
@@ -65,7 +79,13 @@ jobs:
           restore-keys: ${{ runner.os }}-composer-
 
       - name: Install dependencies
-        run: composer install --prefer-dist --no-progress --no-interaction
+        run: composer install --prefer-dist --no-progress --no-interaction --no-scripts
+        working-directory: backend
+
+      - name: Run Symfony scripts
+        run: |
+          php bin/console cache:clear --env=test || true
+          php bin/console assets:install || true
         working-directory: backend
 
       - name: Create .env.test for OnlyRoll

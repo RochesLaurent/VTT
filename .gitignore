@@ -39,3 +39,7 @@ Thumbs.db
 
 # Docker (optionnel)
 .docker/
+
+# Clés JWT (sécurité)
+config/jwt/private.pem
+config/jwt/public.pem

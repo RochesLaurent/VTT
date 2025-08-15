@@ -11,7 +11,8 @@ RUN apk add --no-cache \
     icu-dev \
     oniguruma-dev \
     nodejs \
-    npm
+    npm \
+    netcat-openbsd
 
 RUN docker-php-ext-install \
     pdo_mysql \

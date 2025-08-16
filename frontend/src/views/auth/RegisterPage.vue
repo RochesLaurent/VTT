@@ -1,28 +1,60 @@
 <template>
   <div class="auth-page">
-    <div class="auth-container">
-      <div class="auth-brand">
-        <div class="brand-logo">🎲</div>
-        <h1 class="brand-title">OnlyRoll</h1>
-        <p class="brand-subtitle">Rejoignez l'aventure</p>
+    <div class="auth-background">
+      <div class="gradient-overlay"></div>
+      <div class="decoration-elements">
+        <div class="floating-orb orb-1"></div>
+        <div class="floating-orb orb-2"></div>
+        <div class="floating-orb orb-3"></div>
+        <div class="floating-orb orb-4"></div>
       </div>
+    </div>
 
-      <div class="auth-form-container">
-        <RegisterForm 
-          :redirect-to="redirectTo"
-          @success="handleSuccess"
-          @error="handleError"
-        />
-      </div>
+    <div class="auth-content">
+      <div class="auth-container">
+        <div class="auth-brand">
+          <div class="brand-logo">
+            <div class="dice-container">
+              <svg class="dice-icon" viewBox="0 0 24 24" fill="none">
+                <path d="M12 2L2 7v10l10 5 10-5V7L12 2z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                <circle cx="8.5" cy="8.5" r="1" fill="currentColor"/>
+                <circle cx="15.5" cy="15.5" r="1" fill="currentColor"/>
+                <circle cx="12" cy="12" r="1" fill="currentColor"/>
+                <circle cx="8.5" cy="15.5" r="1" fill="currentColor"/>
+                <circle cx="15.5" cy="8.5" r="1" fill="currentColor"/>
+              </svg>
+            </div>
+          </div>
+          <h1 class="text-display-lg brand-title">OnlyRoll</h1>
+          <p class="text-body-sm brand-subtitle">Rejoignez l'aventure</p>
+        </div>
 
-      <div class="auth-links">
-        <router-link to="/login" class="link">
-          Déjà un compte ? Se connecter
-        </router-link>
-        <span class="separator">•</span>
-        <router-link to="/" class="link">
-          Retour à l'accueil
-        </router-link>
+        <div class="auth-card">
+          <div class="card-header">
+            <h2 class="text-h1">Créer un compte</h2>
+            <p class="text-body-sm card-subtitle">Rejoignez la communauté OnlyRoll et commencez à jouer</p>
+          </div>
+
+          <div class="card-content">
+            <RegisterForm
+              :redirect-to="redirectTo"
+              @success="handleSuccess"
+              @error="handleError"
+            />
+          </div>
+        </div>
+
+        <div class="auth-navigation">
+          <div class="nav-links">
+            <router-link to="/auth/login" class="nav-link primary">
+              <span>Déjà un compte ?</span>
+              <strong>Se connecter</strong>
+            </router-link>
+            <router-link to="/" class="nav-link secondary">
+              ← Retour à l'accueil
+            </router-link>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -50,119 +82,334 @@ const handleError = (error: string) => {
 
 <style scoped>
 .auth-page {
+  position: relative;
+  min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
-  min-height: 100vh;
+  overflow: hidden;
+}
+
+.auth-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+}
+
+.gradient-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, 
+    var(--primary-900) 0%, 
+    var(--secondary-900) 25%, 
+    var(--primary-800) 50%, 
+    var(--secondary-800) 75%, 
+    var(--primary-700) 100%
+  );
+}
+
+.decoration-elements {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+
+.floating-orb {
+  position: absolute;
+  border-radius: 50%;
+  background: linear-gradient(45deg, var(--primary-500), var(--accent-purple));
+  opacity: 0.1;
+  filter: blur(1px);
+  animation: float 8s ease-in-out infinite;
+}
+
+.orb-1 {
+  width: 100px;
+  height: 100px;
+  top: 15%;
+  left: 10%;
+  animation-delay: 0s;
+}
+
+.orb-2 {
+  width: 140px;
+  height: 140px;
+  top: 60%;
+  right: 15%;
+  animation-delay: 2s;
+}
+
+.orb-3 {
+  width: 70px;
+  height: 70px;
+  bottom: 25%;
+  left: 20%;
+  animation-delay: 4s;
+}
+
+.orb-4 {
+  width: 90px;
+  height: 90px;
+  top: 30%;
+  right: 30%;
+  animation-delay: 6s;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  33% { transform: translateY(-15px) rotate(120deg); }
+  66% { transform: translateY(-10px) rotate(240deg); }
+}
+
+.auth-content {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 520px;
+  padding: var(--space-6);
+  animation: slideInUp 0.8s ease-out;
+}
+
+@keyframes slideInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .auth-container {
-  width: 100%;
-  max-width: 520px;
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: var(--space-8);
 }
 
 .auth-brand {
   text-align: center;
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-4);
 }
 
 .brand-logo {
-  font-size: 4rem;
-  margin: 0 auto 1rem;
-  display: block;
+  margin-bottom: var(--space-4);
+}
+
+.dice-container {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, var(--accent-emerald), var(--accent-cyan));
+  border-radius: var(--border-radius-xl);
+  box-shadow: var(--shadow-xl);
+  margin: 0 auto;
+  transition: all var(--transition-normal);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.dice-container:hover {
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 0 30px 60px rgba(16, 185, 129, 0.3);
+}
+
+.dice-icon {
+  width: 40px;
+  height: 40px;
+  color: white;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
 }
 
 .brand-title {
-  font-family: 'Figtree', sans-serif;
-  font-size: 1.875rem;
-  font-weight: 700;
-  color: #f1f5f9;
-  margin-bottom: 0.5rem;
+  background: linear-gradient(135deg, var(--accent-emerald), var(--accent-cyan));
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-align: center;
+  margin-bottom: var(--space-2);
+  font-weight: var(--font-weight-extrabold);
 }
 
 .brand-subtitle {
-  font-size: 1.125rem;
-  color: #94a3b8;
-  font-weight: 500;
-}
-
-.auth-form-container {
-  background-color: #1e293b;
-  border: 1px solid #334155;
-  border-radius: 1rem;
-  padding: 2rem;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-}
-
-.auth-links {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
+  color: var(--text-muted);
   text-align: center;
 }
 
-.separator {
-  color: #94a3b8;
-  font-weight: 500;
+.auth-card {
+  background: rgba(30, 41, 59, 0.8);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: var(--border-radius-xl);
+  box-shadow: 
+    var(--shadow-xl),
+    0 0 0 1px rgba(255, 255, 255, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+  transition: all var(--transition-normal);
 }
 
-.link {
-  color: #818cf8;
+.auth-card:hover {
+  border-color: rgba(16, 185, 129, 0.3);
+  box-shadow: 
+    0 32px 64px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(16, 185, 129, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.card-header {
+  padding: var(--space-8) var(--space-8) var(--space-4);
+  text-align: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.card-subtitle {
+  color: var(--text-muted);
+  margin-top: var(--space-2);
+}
+
+.card-content {
+  padding: var(--space-6) var(--space-8) var(--space-8);
+}
+
+.auth-navigation {
+  text-align: center;
+}
+
+.nav-links {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  align-items: center;
+}
+
+.nav-link {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
   text-decoration: none;
-  font-weight: 500;
-  font-size: 0.875rem;
-  transition: color 0.15s ease;
+  transition: all var(--transition-normal);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--border-radius-lg);
 }
 
-.link:hover {
-  color: #a5b4fc;
-  text-decoration: underline;
+.nav-link.primary {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  color: var(--accent-emerald);
+}
+
+.nav-link.primary:hover {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: var(--accent-emerald);
+  transform: translateY(-2px);
+}
+
+.nav-link.secondary {
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+.nav-link.secondary:hover {
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.nav-link span {
+  font-size: var(--text-sm);
+  opacity: 0.8;
+}
+
+.nav-link strong {
+  font-weight: var(--font-weight-semibold);
+  margin-top: var(--space-1);
 }
 
 @media (max-width: 640px) {
-  .auth-page {
-    padding: 0.5rem;
-  }
-  
-  .auth-container {
-    gap: 1.5rem;
+  .auth-content {
+    padding: var(--space-4);
     max-width: 100%;
   }
   
-  .auth-form-container {
-    padding: 1.5rem;
+  .auth-container {
+    gap: var(--space-6);
   }
   
-  .brand-logo {
-    font-size: 3rem;
+  .dice-container {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .dice-icon {
+    width: 30px;
+    height: 30px;
   }
   
   .brand-title {
-    font-size: 1.5rem;
+    font-size: var(--text-2xl);
   }
   
-  .brand-subtitle {
-    font-size: 1rem;
+  .card-header {
+    padding: var(--space-6) var(--space-6) var(--space-4);
   }
   
-  .auth-links {
-    flex-direction: column;
-    gap: 0.5rem;
+  .card-content {
+    padding: var(--space-4) var(--space-6) var(--space-6);
   }
   
-  .separator {
-    display: none;
+  .orb-1 {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .orb-2 {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .orb-3 {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .orb-4 {
+    width: 65px;
+    height: 65px;
   }
 }
 
 @media (max-width: 480px) {
-  .auth-form-container {
-    padding: 1rem;
+  .auth-content {
+    padding: var(--space-3);
+  }
+  
+  .floating-orb {
+    opacity: 0.05;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .floating-orb,
+  .dice-container {
+    animation: none;
+  }
+  
+  .auth-content {
+    animation: none;
   }
 }
 </style>

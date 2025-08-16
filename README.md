@@ -204,3 +204,4 @@ Ce projet est sous licence MIT. Voir le fichier [LICENSE](LICENSE) pour plus de 
 **Fait avec ❤️ pour la communauté du jeu de rôle**
 
 > *"L'aventure commence par un simple clic"*
+

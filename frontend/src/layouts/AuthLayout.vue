@@ -20,7 +20,7 @@
     <footer class="auth-footer">
       <div class="footer-content">
         <p class="text-caption">
-          © {{ currentYear }} Projet J. Plateforme de table virtuelle pour D&D 5e.
+          © {{ currentYear }} OnlyRoll. Plateforme de table virtuelle pour D&D 5e.
         </p>
         <div class="footer-links">
           <router-link to="/terms" class="footer-link">

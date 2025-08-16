@@ -24,6 +24,8 @@ const REGEX = {
   STRONG_PASSWORD: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]{8,}$/,
   
   NAME: /^[a-zA-ZÀ-ÿ\s'-]{2,50}$/,
+  
+  PSEUDO: /^[a-zA-ZÀ-ÿ0-9\s_'-]{3,250}$/,
 };
 
 export const authValidationSchemas = {
@@ -51,6 +53,16 @@ export const authValidationSchemas = {
       .matches(REGEX.USERNAME, 'Le nom d\'utilisateur doit contenir 3-20 caractères (lettres, chiffres, - et _)')
       .test('no-spaces', 'Le nom d\'utilisateur ne peut pas contenir d\'espaces', (value) => {
         return !value || !value.includes(' ');
+      }),
+    
+    pseudo: yup
+      .string()
+      .required()
+      .min(3, 'Le pseudo doit contenir au moins 3 caractères')
+      .max(250, 'Le pseudo ne peut pas dépasser 250 caractères')
+      .matches(REGEX.PSEUDO, 'Le pseudo contient des caractères non autorisés')
+      .test('not-only-spaces', 'Le pseudo ne peut pas contenir uniquement des espaces', (value) => {
+        return !value || value.trim().length > 0;
       }),
     
     email: yup

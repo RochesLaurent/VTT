@@ -50,7 +50,7 @@
             <div class="text-sm font-medium text-text-primary">Notifications par email</div>
             <div class="text-xs text-text-muted">Recevoir des emails de notification</div>
           </div>
-          <ToggleSwitch v-model="form.notifications!.email" />
+          <ToggleSwitch v-model="form.notifications.email" />
         </div>
 
         <div class="flex items-center justify-between">
@@ -58,7 +58,7 @@
             <div class="text-sm font-medium text-text-primary">Notifications push</div>
             <div class="text-xs text-text-muted">Notifications dans le navigateur</div>
           </div>
-          <ToggleSwitch v-model="form.notifications!.push" />
+          <ToggleSwitch v-model="form.notifications.push" />
         </div>
 
         <div class="flex items-center justify-between">
@@ -66,7 +66,7 @@
             <div class="text-sm font-medium text-text-primary">Invitations de partie</div>
             <div class="text-xs text-text-muted">Être notifié des invitations</div>
           </div>
-          <ToggleSwitch v-model="form.notifications!.gameInvites" />
+          <ToggleSwitch v-model="form.notifications.gameInvites" />
         </div>
 
         <div class="flex items-center justify-between">
@@ -74,7 +74,7 @@
             <div class="text-sm font-medium text-text-primary">Mises à jour de partie</div>
             <div class="text-xs text-text-muted">Rappels et mises à jour importantes</div>
           </div>
-          <ToggleSwitch v-model="form.notifications!.updates" />
+          <ToggleSwitch v-model="form.notifications.updates" />
         </div>
 
         <div class="flex items-center justify-between">
@@ -82,7 +82,7 @@
             <div class="text-sm font-medium text-text-primary">Nouveaux messages</div>
             <div class="text-xs text-text-muted">Messages dans le chat de partie</div>
           </div>
-          <ToggleSwitch v-model="form.notifications!.messages" />
+          <ToggleSwitch v-model="form.notifications.messages" />
         </div>
       </div>
     </div>
@@ -97,7 +97,7 @@
             <div class="text-sm font-medium text-text-primary">Lancer automatique des dés</div>
             <div class="text-xs text-text-muted">Lancer les dés automatiquement lors des actions</div>
           </div>
-          <ToggleSwitch v-model="form.game!.autoRoll" />
+          <ToggleSwitch v-model="form.game.autoRoll" />
         </div>
 
         <div class="flex items-center justify-between">
@@ -105,7 +105,7 @@
             <div class="text-sm font-medium text-text-primary">Animation des dés</div>
             <div class="text-xs text-text-muted">Afficher les animations de lancer de dés</div>
           </div>
-          <ToggleSwitch v-model="form.game!.showDiceAnimation" />
+          <ToggleSwitch v-model="form.game.showDiceAnimation" />
         </div>
 
         <div class="flex items-center justify-between">
@@ -113,7 +113,7 @@
             <div class="text-sm font-medium text-text-primary">Effets sonores</div>
             <div class="text-xs text-text-muted">Sons pour les dés et notifications</div>
           </div>
-          <ToggleSwitch v-model="form.game!.soundEffects" />
+          <ToggleSwitch v-model="form.game.soundEffects" />
         </div>
 
         <div class="flex items-center justify-between">
@@ -121,7 +121,7 @@
             <div class="text-sm font-medium text-text-primary">Taille de la grille</div>
             <div class="text-xs text-text-muted">Taille par défaut de la grille de carte</div>
           </div>
-          <select v-model="form.game!.gridSize" class="input input-sm">
+          <select v-model="form.game.gridSize" class="input input-sm">
             <option value="small">Petite</option>
             <option value="medium">Moyenne</option>
             <option value="large">Grande</option>
@@ -140,7 +140,7 @@
             <div class="text-sm font-medium text-text-primary">Afficher votre email</div>
             <div class="text-xs text-text-muted">Rendre votre email visible aux autres joueurs</div>
           </div>
-          <ToggleSwitch v-model="form.privacy!.showEmail" />
+          <ToggleSwitch v-model="form.privacy.showEmail" />
         </div>
 
         <div class="flex items-center justify-between">
@@ -148,7 +148,7 @@
             <div class="text-sm font-medium text-text-primary">Afficher votre nom réel</div>
             <div class="text-xs text-text-muted">Afficher vos nom et prénom sur votre profil</div>
           </div>
-          <ToggleSwitch v-model="form.privacy!.showRealName" />
+          <ToggleSwitch v-model="form.privacy.showRealName" />
         </div>
 
         <div class="flex items-center justify-between">
@@ -156,7 +156,7 @@
             <div class="text-sm font-medium text-text-primary">Autoriser les invitations</div>
             <div class="text-xs text-text-muted">Permettre aux autres de vous inviter dans leurs parties</div>
           </div>
-          <ToggleSwitch v-model="form.privacy!.allowInvites" />
+          <ToggleSwitch v-model="form.privacy.allowInvites" />
         </div>
       </div>
     </div>
@@ -233,39 +233,40 @@ const defaultPreferences: UserPreferences = {
   }
 };
 
-const form = ref<UserPreferences>({});
-const originalForm = ref<UserPreferences>({});
+const form = ref<UserPreferences>({ ...defaultPreferences });
+const originalForm = ref<UserPreferences>({ ...defaultPreferences });
 
 const hasChanges = computed(() => {
   return JSON.stringify(form.value) !== JSON.stringify(originalForm.value);
 });
 
 const initForm = () => {
+  // Fusion sécurisée avec les valeurs par défaut
   const safePreferences: UserPreferences = {
-    theme: props.preferences?.theme || 'dark',
-    language: props.preferences?.language || 'fr',
+    theme: props.preferences?.theme || defaultPreferences.theme,
+    language: props.preferences?.language || defaultPreferences.language,
     notifications: {
-      email: props.preferences?.notifications?.email ?? true,
-      push: props.preferences?.notifications?.push ?? true,
-      gameInvites: props.preferences?.notifications?.gameInvites ?? true,
-      messages: props.preferences?.notifications?.messages ?? true,
-      updates: props.preferences?.notifications?.updates ?? true
+      email: props.preferences?.notifications?.email ?? defaultPreferences.notifications.email,
+      push: props.preferences?.notifications?.push ?? defaultPreferences.notifications.push,
+      gameInvites: props.preferences?.notifications?.gameInvites ?? defaultPreferences.notifications.gameInvites,
+      messages: props.preferences?.notifications?.messages ?? defaultPreferences.notifications.messages,
+      updates: props.preferences?.notifications?.updates ?? defaultPreferences.notifications.updates
     },
     game: {
-      autoRoll: props.preferences?.game?.autoRoll ?? false,
-      showDiceAnimation: props.preferences?.game?.showDiceAnimation ?? true,
-      soundEffects: props.preferences?.game?.soundEffects ?? true,
-      gridSize: props.preferences?.game?.gridSize ?? 'medium'
+      autoRoll: props.preferences?.game?.autoRoll ?? defaultPreferences.game.autoRoll,
+      showDiceAnimation: props.preferences?.game?.showDiceAnimation ?? defaultPreferences.game.showDiceAnimation,
+      soundEffects: props.preferences?.game?.soundEffects ?? defaultPreferences.game.soundEffects,
+      gridSize: props.preferences?.game?.gridSize ?? defaultPreferences.game.gridSize
     },
     privacy: {
-      showEmail: props.preferences?.privacy?.showEmail ?? false,
-      showRealName: props.preferences?.privacy?.showRealName ?? true,
-      allowInvites: props.preferences?.privacy?.allowInvites ?? true
+      showEmail: props.preferences?.privacy?.showEmail ?? defaultPreferences.privacy.showEmail,
+      showRealName: props.preferences?.privacy?.showRealName ?? defaultPreferences.privacy.showRealName,
+      allowInvites: props.preferences?.privacy?.allowInvites ?? defaultPreferences.privacy.allowInvites
     }
   };
   
-  form.value = JSON.parse(JSON.stringify(safePreferences));
-  originalForm.value = JSON.parse(JSON.stringify(safePreferences));
+  form.value = { ...safePreferences };
+  originalForm.value = { ...safePreferences };
 };
 
 const resetForm = () => {

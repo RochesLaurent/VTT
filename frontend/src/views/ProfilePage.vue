@@ -231,11 +231,13 @@ const handlePreferencesUpdate = async (preferences: UserPreferences) => {
   }
 };
 
-const handleAccountDeletion = async (password: string) => {
+const handleAccountDeletion = async (password: string | null) => {
   if (!password || password.trim() === '') {
     showError('Le mot de passe est requis pour confirmer la suppression');
     return;
   }
+
+  const validPassword = password.trim();
 
   confirmDialog.value = {
     title: 'Supprimer le compte',
@@ -246,13 +248,10 @@ const handleAccountDeletion = async (password: string) => {
       isLoading.value = true;
       
       try {
-        const validPassword = password.trim();
-        if (validPassword) {
-          await UserService.deleteAccount(validPassword);
-          showSuccess('Compte supprimé avec succès');
-          await authStore.logout();
-          router.push('/');
-        }
+        await UserService.deleteAccount(validPassword);
+        showSuccess('Compte supprimé avec succès');
+        await authStore.logout();
+        router.push('/');
       } catch (err: any) {
         showError(err.message || 'Erreur lors de la suppression du compte');
       } finally {

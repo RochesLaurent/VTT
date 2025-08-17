@@ -38,30 +38,28 @@ export interface PasswordChangeData {
   newPassword: string;
   confirmPassword: string;
 }
-
 export interface UserPreferences {
-  theme?: 'dark' | 'light' | 'system';
-  language?: 'fr' | 'en';
-  notifications?: {
-    email?: boolean;
-    push?: boolean;
-    gameInvites?: boolean;  
-    messages?: boolean;     
-    updates?: boolean;      
+  theme: 'dark' | 'light' | 'system';
+  language: 'fr' | 'en';
+  notifications: {
+    email: boolean;
+    push: boolean;
+    gameInvites: boolean;
+    messages: boolean;
+    updates: boolean;
   };
-  game?: {
-    autoRoll?: boolean;         
-    showDiceAnimation?: boolean;
-    soundEffects?: boolean;
-    gridSize?: 'small' | 'medium' | 'large'; 
+  game: {
+    autoRoll: boolean;
+    showDiceAnimation: boolean;
+    soundEffects: boolean;
+    gridSize: 'small' | 'medium' | 'large';
   };
-  privacy?: {
-    showEmail?: boolean;   
-    showRealName?: boolean;
-    allowInvites?: boolean;
+  privacy: {
+    showEmail: boolean;
+    showRealName: boolean;
+    allowInvites: boolean;
   };
 }
-
 export interface UserStatistics {
   accountAge: number;
   lastActivity: string;

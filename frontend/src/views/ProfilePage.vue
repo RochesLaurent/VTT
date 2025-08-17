@@ -232,7 +232,8 @@ const handlePreferencesUpdate = async (preferences: UserPreferences) => {
 };
 
 const handleAccountDeletion = async (password: string | null) => {
-  if (!password || password.trim() === '') {
+  // Validation pour s'assurer qu'on a un mot de passe valide
+  if (!password || typeof password !== 'string' || password.trim() === '') {
     showError('Le mot de passe est requis pour confirmer la suppression');
     return;
   }

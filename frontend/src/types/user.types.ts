@@ -21,7 +21,7 @@ export interface UserProfile {
   avatar?: string | null;
   createdAt: string;
   updatedAt?: string;
-  preferences: UserPreferences;
+  preferences?: UserPreferences;
   statistics?: UserStatistics;
 }
 
@@ -38,28 +38,17 @@ export interface PasswordChangeData {
   newPassword: string;
   confirmPassword: string;
 }
+
 export interface UserPreferences {
-  theme: 'dark' | 'light' | 'system';
-  language: 'fr' | 'en';
-  notifications: {
-    email: boolean;
-    push: boolean;
-    gameInvites: boolean;
-    messages: boolean;
-    updates: boolean;
-  };
-  game: {
-    autoRoll: boolean;
-    showDiceAnimation: boolean;
-    soundEffects: boolean;
-    gridSize: 'small' | 'medium' | 'large';
-  };
-  privacy: {
-    showEmail: boolean;
-    showRealName: boolean;
-    allowInvites: boolean;
-  };
+  theme?: 'dark' | 'light' | 'system';
+  language?: 'fr' | 'en';
+  dice_animation?: boolean;
+  auto_roll_damage?: boolean;
+  show_spell_descriptions?: boolean;
+  grid_snap?: boolean;
+  measurement_unit?: 'feet' | 'meters';
 }
+
 export interface UserStatistics {
   accountAge: number;
   lastActivity: string;

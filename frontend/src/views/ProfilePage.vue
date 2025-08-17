@@ -232,6 +232,11 @@ const handlePreferencesUpdate = async (preferences: UserPreferences) => {
 };
 
 const handleAccountDeletion = async (password: string) => {
+  if (!password || password.trim() === '') {
+    showError('Le mot de passe est requis pour confirmer la suppression');
+    return;
+  }
+
   confirmDialog.value = {
     title: 'Supprimer le compte',
     message: 'Cette action est irréversible. Toutes vos données seront définitivement supprimées. Êtes-vous sûr de vouloir continuer ?',

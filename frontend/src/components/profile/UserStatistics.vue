@@ -1,12 +1,13 @@
 <template>
   <div v-if="user" class="space-y-6">
+    <!-- Overview Stats -->
     <div>
       <h3 class="text-lg font-semibold text-text-primary mb-4">Aperçu général</h3>
       
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard
           title="Parties jouées"
-          :value="statistics?.gamesPlayed || 0"
+          :value="statistics?.gamesJoined || 0"
           icon="gamepad-2"
           color="primary"
         />
@@ -31,6 +32,7 @@
       </div>
     </div>
 
+    <!-- Activity Stats -->
     <div class="border-t border-border-primary pt-6">
       <h3 class="text-lg font-semibold text-text-primary mb-4">Activité</h3>
       
@@ -50,6 +52,7 @@
       </div>
     </div>
 
+    <!-- Favorite Character -->
     <div v-if="statistics?.mostPlayedCharacter" class="border-t border-border-primary pt-6">
       <h3 class="text-lg font-semibold text-text-primary mb-4">Personnage favori</h3>
       
@@ -70,6 +73,7 @@
       </div>
     </div>
 
+    <!-- Account Information -->
     <div class="border-t border-border-primary pt-6">
       <h3 class="text-lg font-semibold text-text-primary mb-4">Informations du compte</h3>
       
@@ -91,6 +95,7 @@
       </div>
     </div>
 
+    <!-- Achievements Preview -->
     <div class="border-t border-border-primary pt-6">
       <h3 class="text-lg font-semibold text-text-primary mb-4">Succès</h3>
       
@@ -148,6 +153,7 @@ const props = defineProps<Props>();
 const statistics = ref<UserStatistics | null>(null);
 const isLoading = ref(false);
 
+// Mock achievements for demo
 const achievements = ref<Achievement[]>([
   {
     id: '1',
@@ -173,24 +179,34 @@ const loadStatistics = async () => {
   isLoading.value = true;
   
   try {
-    statistics.value = await UserService.getStatistics();
-  } catch (error) {
-    console.error('Failed to load statistics:', error);
+    // Pour l'instant, on utilise des données mockées basées sur les types existants
+    // Plus tard, quand l'endpoint sera disponible : statistics.value = await UserService.getStatistics();
     statistics.value = {
-      gamesPlayed: 12,
+      accountAge: Math.floor((Date.now() - new Date(props.user.createdAt).getTime()) / (1000 * 60 * 60 * 24)),
+      lastActivity: new Date().toISOString(),
       gamesCreated: 3,
+      gamesJoined: 12,
+      charactersCreated: 5,
+      // Propriétés additionnelles
       hoursPlayed: 48.5,
       messagesPosted: 234,
       diceRolled: 1567,
-      charactersCreated: 5,
-      joinedAt: props.user.createdAt,
-      lastActivity: new Date().toISOString(),
       favoriteSystem: 'D&D 5e',
       mostPlayedCharacter: {
         name: 'Elara Nightwhisper',
         class: 'Rôdeur Elfe',
         level: 8
       }
+    };
+  } catch (error) {
+    console.error('Failed to load statistics:', error);
+    // Fallback data based on existing types
+    statistics.value = {
+      accountAge: Math.floor((Date.now() - new Date(props.user?.createdAt || '').getTime()) / (1000 * 60 * 60 * 24)),
+      lastActivity: new Date().toISOString(),
+      gamesCreated: 0,
+      gamesJoined: 0,
+      charactersCreated: 0
     };
   } finally {
     isLoading.value = false;
@@ -237,4 +253,5 @@ onMounted(() => {
 </script>
 
 <style scoped>
+/* Component styles are handled by the imported components and global CSS */
 </style>

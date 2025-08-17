@@ -1,65 +1,65 @@
+export interface User {
+  id: number;
+  email: string;
+  username: string;
+  pseudo: string;
+  firstname?: string;
+  lastname?: string;
+  roles: string[];
+  avatar?: string | null;
+  createdAt: string;
+  updatedAt?: string;
+}
+
 export interface UserProfile {
   id: number;
   email: string;
   username: string;
   pseudo: string;
-  firstname: string;
-  lastname: string;
-  fullName: string;
-  avatar: string | null;
-  bio: string | null;
-  preferences: UserPreferences;
-  roles: string[];
+  firstname?: string;
+  lastname?: string;
+  avatar?: string | null;
   createdAt: string;
-  updatedAt: string | null;
-  lastLoginAt?: string | null;
-  isActive?: boolean;
-  isVerified?: boolean;
+  updatedAt?: string;
+  preferences: UserPreferences;
+  statistics?: UserStatistics;
 }
 
 export interface UserUpdateData {
   email?: string;
+  username?: string;
   pseudo?: string;
   firstname?: string;
   lastname?: string;
-  bio?: string;
-  currentPassword?: string;
-  newPassword?: string;
 }
 
 export interface PasswordChangeData {
   currentPassword: string;
   newPassword: string;
-  newPasswordConfirm: string;
+  confirmPassword: string;
 }
 
 export interface UserPreferences {
-  theme?: 'light' | 'dark' | 'auto';
+  theme?: 'dark' | 'light' | 'system';
   language?: 'fr' | 'en';
   notifications?: {
     email?: boolean;
     push?: boolean;
-    gameInvites?: boolean;
-    messages?: boolean;
-    updates?: boolean;
+    gameInvites?: boolean;  
+    messages?: boolean;     
+    updates?: boolean;      
   };
   game?: {
-    autoRoll?: boolean;
+    autoRoll?: boolean;         
     showDiceAnimation?: boolean;
     soundEffects?: boolean;
-    gridSize?: 'small' | 'medium' | 'large';
+    gridSize?: 'small' | 'medium' | 'large'; 
   };
   privacy?: {
-    showEmail?: boolean;
+    showEmail?: boolean;   
     showRealName?: boolean;
     allowInvites?: boolean;
   };
-}
-
-export interface AccountDeletionData {
-  password: string;
-  reason?: string;
-  feedback?: string;
 }
 
 export interface UserStatistics {
@@ -68,4 +68,37 @@ export interface UserStatistics {
   gamesCreated: number;
   gamesJoined: number;
   charactersCreated: number;
+  hoursPlayed?: number;
+  messagesPosted?: number;
+  diceRolled?: number;
+  favoriteSystem?: string;
+  mostPlayedCharacter?: {
+    name: string;
+    class: string;
+    level: number;
+  };
+}
+
+export interface AuthState {
+  user: User | null;
+  token: string | null;
+  refreshToken: string | null;
+  isAuthenticated: boolean;
+  loading: boolean;
+  error: string | null;
+}
+
+export interface LoginCredentials {
+  email: string;
+  password: string;
+  rememberMe?: boolean;
+}
+
+export interface RegisterData {
+  email: string;
+  username: string;
+  pseudo: string;
+  password: string;
+  confirmPassword: string;
+  acceptTerms: boolean;
 }

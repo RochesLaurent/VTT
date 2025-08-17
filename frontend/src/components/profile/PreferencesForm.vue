@@ -64,15 +64,15 @@
             <div class="text-sm font-medium text-text-primary">Invitations de partie</div>
             <div class="text-xs text-text-muted">Être notifié des invitations</div>
           </div>
-          <ToggleSwitch v-model="form.notifications.gameInvitations" />
+          <ToggleSwitch v-model="form.notifications.gameInvites" />
         </div>
 
         <div class="flex items-center justify-between">
           <div>
-            <div class="text-sm font-medium text-text-primary">Rappels de partie</div>
-            <div class="text-xs text-text-muted">Rappels avant le début des sessions</div>
+            <div class="text-sm font-medium text-text-primary">Mises à jour de partie</div>
+            <div class="text-xs text-text-muted">Rappels et mises à jour importantes</div>
           </div>
-          <ToggleSwitch v-model="form.notifications.gameReminders" />
+          <ToggleSwitch v-model="form.notifications.updates" />
         </div>
 
         <div class="flex items-center justify-between">
@@ -80,7 +80,7 @@
             <div class="text-sm font-medium text-text-primary">Nouveaux messages</div>
             <div class="text-xs text-text-muted">Messages dans le chat de partie</div>
           </div>
-          <ToggleSwitch v-model="form.notifications.newMessages" />
+          <ToggleSwitch v-model="form.notifications.messages" />
         </div>
       </div>
     </div>
@@ -94,15 +94,15 @@
             <div class="text-sm font-medium text-text-primary">Lancer automatique des dés</div>
             <div class="text-xs text-text-muted">Lancer les dés automatiquement lors des actions</div>
           </div>
-          <ToggleSwitch v-model="form.game.autoRollDice" />
+          <ToggleSwitch v-model="form.game.autoRoll" />
         </div>
 
         <div class="flex items-center justify-between">
           <div>
-            <div class="text-sm font-medium text-text-primary">Historique des dés</div>
-            <div class="text-xs text-text-muted">Afficher l'historique des lancers de dés</div>
+            <div class="text-sm font-medium text-text-primary">Animation des dés</div>
+            <div class="text-xs text-text-muted">Afficher les animations de lancer de dés</div>
           </div>
-          <ToggleSwitch v-model="form.game.showDiceHistory" />
+          <ToggleSwitch v-model="form.game.showDiceAnimation" />
         </div>
 
         <div class="flex items-center justify-between">
@@ -115,10 +115,14 @@
 
         <div class="flex items-center justify-between">
           <div>
-            <div class="text-sm font-medium text-text-primary">Confirmation des actions</div>
-            <div class="text-xs text-text-muted">Demander confirmation pour les actions importantes</div>
+            <div class="text-sm font-medium text-text-primary">Taille de la grille</div>
+            <div class="text-xs text-text-muted">Taille par défaut de la grille de carte</div>
           </div>
-          <ToggleSwitch v-model="form.game.confirmActions" />
+          <select v-model="form.game.gridSize" class="input input-sm">
+            <option value="small">Petite</option>
+            <option value="medium">Moyenne</option>
+            <option value="large">Grande</option>
+          </select>
         </div>
       </div>
     </div>
@@ -129,26 +133,26 @@
       <div class="space-y-4">
         <div class="flex items-center justify-between">
           <div>
-            <div class="text-sm font-medium text-text-primary">Statut en ligne</div>
-            <div class="text-xs text-text-muted">Afficher votre statut en ligne aux autres joueurs</div>
+            <div class="text-sm font-medium text-text-primary">Afficher votre email</div>
+            <div class="text-xs text-text-muted">Rendre votre email visible aux autres joueurs</div>
           </div>
-          <ToggleSwitch v-model="form.privacy.showOnlineStatus" />
+          <ToggleSwitch v-model="form.privacy.showEmail" />
         </div>
 
         <div class="flex items-center justify-between">
           <div>
-            <div class="text-sm font-medium text-text-primary">Parties jouées</div>
-            <div class="text-xs text-text-muted">Afficher vos statistiques de jeu sur votre profil</div>
+            <div class="text-sm font-medium text-text-primary">Afficher votre nom réel</div>
+            <div class="text-xs text-text-muted">Afficher vos nom et prénom sur votre profil</div>
           </div>
-          <ToggleSwitch v-model="form.privacy.showGamesPlayed" />
+          <ToggleSwitch v-model="form.privacy.showRealName" />
         </div>
 
         <div class="flex items-center justify-between">
           <div>
-            <div class="text-sm font-medium text-text-primary">Messages directs</div>
-            <div class="text-xs text-text-muted">Autoriser les autres joueurs à vous envoyer des messages</div>
+            <div class="text-sm font-medium text-text-primary">Autoriser les invitations</div>
+            <div class="text-xs text-text-muted">Permettre aux autres de vous inviter dans leurs parties</div>
           </div>
-          <ToggleSwitch v-model="form.privacy.allowDirectMessages" />
+          <ToggleSwitch v-model="form.privacy.allowInvites" />
         </div>
       </div>
     </div>
@@ -207,20 +211,20 @@ const defaultPreferences: UserPreferences = {
   notifications: {
     email: true,
     push: true,
-    gameInvitations: true,
-    gameReminders: true,
-    newMessages: true
+    gameInvites: true,
+    updates: true,
+    messages: true
   },
   game: {
-    autoRollDice: false,
-    showDiceHistory: true,
+    autoRoll: false,
+    showDiceAnimation: true,
     soundEffects: true,
-    confirmActions: true
+    gridSize: 'medium'
   },
   privacy: {
-    showOnlineStatus: true,
-    showGamesPlayed: true,
-    allowDirectMessages: true
+    showEmail: false,
+    showRealName: true,
+    allowInvites: true
   }
 };
 

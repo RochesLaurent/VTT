@@ -6,7 +6,7 @@
         <div class="w-24 h-24 rounded-full overflow-hidden bg-secondary-700 border-2 border-border-primary">
           <img 
             v-if="avatarPreview || user?.avatar" 
-            :src="avatarPreview || user?.avatar" 
+            :src="avatarPreview || user?.avatar || ''" 
             alt="Avatar"
             class="w-full h-full object-cover"
           />

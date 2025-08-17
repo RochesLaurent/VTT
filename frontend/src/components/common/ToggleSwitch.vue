@@ -26,6 +26,7 @@ interface Emits {
 }
 
 const props = withDefaults(defineProps<Props>(), {
+  modelValue: false,
   disabled: false
 });
 

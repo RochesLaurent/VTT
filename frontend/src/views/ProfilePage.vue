@@ -246,10 +246,13 @@ const handleAccountDeletion = async (password: string) => {
       isLoading.value = true;
       
       try {
-        await UserService.deleteAccount(password);
-        showSuccess('Compte supprimé avec succès');
-        await authStore.logout();
-        router.push('/');
+        const validPassword = password.trim();
+        if (validPassword) {
+          await UserService.deleteAccount(validPassword);
+          showSuccess('Compte supprimé avec succès');
+          await authStore.logout();
+          router.push('/');
+        }
       } catch (err: any) {
         showError(err.message || 'Erreur lors de la suppression du compte');
       } finally {

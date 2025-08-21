@@ -1,123 +1,181 @@
-import { createRouter, createWebHistory } from 'vue-router';
-import { authGuard, guestGuard } from './guards';
-import HomeView from '../views/HomeView.vue';
+// frontend/src/router/index.ts
 
-import LoginPage from '@/views/auth/LoginPage.vue';
-import RegisterPage from '@/views/auth/RegisterPage.vue';
-import ForgotPasswordPage from '@/views/auth/ForgotPasswordPage.vue';
+import { createRouter, createWebHistory } from 'vue-router'
+import type { RouteRecordRaw } from 'vue-router'
+import { useAuthStore } from '@/stores/authStore'
 
-import ProfilePage from '@/views/ProfilePage.vue';
+// Pages publiques
+import HomePage from '@/views/HomeView.vue'
+import LoginPage from '@/views/auth/LoginPage.vue'
+import RegisterPage from '@/views/auth/RegisterPage.vue'
+import ForgotPasswordPage from '@/views/auth/ForgotPasswordPage.vue'
+
+// Pages authentifiées
+// const DashboardPage = () => import('@/views/DashboardPage.vue')
+const Profile = () => import('@/views/Profile.vue')
+// const GamesListPage = () => import('@/views/GamesListPage.vue')
+// const GamePage = () => import('@/views/GamePage.vue')
+// const CreateGamePage = () => import('@/views/CreateGamePage.vue')
+
+// Pages Wiki (publiques)
+// const WikiHomePage = () => import('@/views/wiki/WikiHomePage.vue')
+// const SpellsListPage = () => import('@/views/wiki/SpellsListPage.vue')
+// const SpellDetailPage = () => import('@/views/wiki/SpellDetailPage.vue')
+
+const routes: RouteRecordRaw[] = [
+  // Routes publiques
+  {
+    path: '/',
+    name: 'home',
+    component: HomePage,
+    meta: { requiresAuth: false }
+  },
+  {
+    path: '/auth/login',
+    name: 'login',
+    component: LoginPage,
+    meta: { requiresAuth: false, guestOnly: true }
+  },
+  {
+    path: '/auth/register',
+    name: 'register',
+    component: RegisterPage,
+    meta: { requiresAuth: false, guestOnly: true }
+  },
+  {
+    path: '/auth/forgot-password',
+    name: 'forgot-password',
+    component: ForgotPasswordPage,
+    meta: { requiresAuth: false, guestOnly: true }
+  },
+
+  // Routes authentifiées
+  // {
+  //   path: '/dashboard',
+  //   name: 'dashboard',
+  //   component: DashboardPage,
+  //   meta: { requiresAuth: true }
+  // },
+  {
+    path: '/profile',
+    name: 'profile',
+    component: Profile, // ✅ Utilise le bon composant
+    meta: { requiresAuth: true }
+  },
+  // {
+  //   path: '/games',
+  //   name: 'games',
+  //   component: GamesListPage,
+  //   meta: { requiresAuth: true }
+  // },
+  // {
+  //   path: '/games/create',
+  //   name: 'create-game',
+  //   component: CreateGamePage,
+  //   meta: { requiresAuth: true, requiresRole: 'ROLE_MASTER' }
+  // },
+  // {
+  //   path: '/games/:code',
+  //   name: 'game',
+  //   component: GamePage,
+  //   meta: { requiresAuth: true },
+  //   props: true
+  // },
+
+  // Routes Wiki (publiques mais peuvent avoir des fonctionnalités supplémentaires si connecté)
+  // {
+  //   path: '/wiki',
+  //   name: 'wiki',
+  //   component: WikiHomePage,
+  //   meta: { requiresAuth: false }
+  // },
+  // {
+  //   path: '/wiki/spells',
+  //   name: 'spells-list',
+  //   component: SpellsListPage,
+  //   meta: { requiresAuth: false }
+  // },
+  // {
+  //   path: '/wiki/spells/:id',
+  //   name: 'spell-detail',
+  //   component: SpellDetailPage,
+  //   meta: { requiresAuth: false },
+  //   props: true
+  // },
+
+  // Route 404
+  // {
+  //   path: '/:pathMatch(.*)*',
+  //   name: 'not-found',
+  //   component: () => import('@/views/NotFoundPage.vue'),
+  //   meta: { requiresAuth: false }
+  // }
+]
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-  routes: [
-    {
-      path: '/',
-      name: 'home',
-      component: HomeView
-    },
-    {
-      path: '/auth',
-      redirect: '/auth/login',
-      children: [
-        {
-          path: 'login',
-          name: 'login',
-          component: LoginPage,
-          beforeEnter: guestGuard,
-          meta: { 
-            title: 'Connexion',
-            layout: 'auth'
-          }
-        },
-        {
-          path: 'register',
-          name: 'register',
-          component: RegisterPage,
-          beforeEnter: guestGuard,
-          meta: { 
-            title: 'Inscription',
-            layout: 'auth'
-          }
-        },
-        {
-          path: 'forgot-password',
-          name: 'forgot-password',
-          component: ForgotPasswordPage,
-          beforeEnter: guestGuard,
-          meta: { 
-            title: 'Mot de passe oublié',
-            layout: 'auth'
-          }
-        },
-        // {
-        //   path: 'reset-password/:token',
-        //   name: 'reset-password',
-        //   component: () => import('@/views/auth/ResetPasswordPage.vue'),
-        //   beforeEnter: guestGuard,
-        //   meta: { 
-        //     title: 'Réinitialiser le mot de passe',
-        //     layout: 'auth'
-        //   }
-        // }
-      ]
-    },
-    {
-      path: '/profile',
-      name: 'profile',
-      component: ProfilePage,
-      beforeEnter: authGuard,
-      meta: { 
-        title: 'Mon Profil',
-        requiresAuth: true,
-        layout: 'default'
-      }
-    },
-    // {
-    //   path: '/dashboard',
-    //   name: 'dashboard',
-    //   component: () => import('@/views/DashboardView.vue'),
-    //   beforeEnter: authGuard,
-    //   meta: { 
-    //     title: 'Tableau de bord',
-    //     requiresAuth: true,
-    //     layout: 'default'
-    //   }
-    // },
-    // {
-    //   path: '/games',
-    //   name: 'games',
-    //   component: () => import('@/views/GamesView.vue'),
-    //   beforeEnter: authGuard,
-    //   meta: { 
-    //     title: 'Mes Parties',
-    //     requiresAuth: true,
-    //     layout: 'default'
-    //   }
-    // },
-    // {
-    //   path: '/:pathMatch(.*)*',
-    //   name: 'not-found',
-    //   component: () => import('@/views/NotFoundView.vue'),
-    //   meta: { 
-    //     title: 'Page non trouvée',
-    //     layout: 'minimal'
-    //   }
-    // }
-  ],
+  routes,
   scrollBehavior(to, from, savedPosition) {
     if (savedPosition) {
-      return savedPosition;
+      return savedPosition
+    } else if (to.hash) {
+      return { el: to.hash, behavior: 'smooth' }
     } else {
-      return { top: 0 };
+      return { top: 0 }
     }
   }
-});
+})
 
-router.beforeEach((to, from, next) => {
-  const defaultTitle = 'OnlyRoll - Plateforme VTT D&D 5e';
-  document.title = to.meta.title ? `${to.meta.title} | OnlyRoll` : defaultTitle;
-  next();
-});
+// Navigation guards
+router.beforeEach(async (to, from, next) => {
+  const authStore = useAuthStore()
+  
+  // Initialiser l'auth store si nécessaire
+  if (!authStore.isAuthenticated && localStorage.getItem('token')) {
+    try {
+      await authStore.initialize()
+    } catch (error) {
+      console.error('Erreur d\'initialisation:', error)
+    }
+  }
 
-export default router;
+  const requiresAuth = to.meta.requiresAuth
+  const guestOnly = to.meta.guestOnly
+  const requiresRole = to.meta.requiresRole as string | undefined
+  const isAuthenticated = authStore.isAuthenticated
+
+  // Redirection pour les pages guest-only
+  if (guestOnly && isAuthenticated) {
+    return next({ name: 'dashboard' })
+  }
+
+  // Vérification de l'authentification
+  if (requiresAuth && !isAuthenticated) {
+    return next({
+      name: 'login',
+      query: { redirect: to.fullPath }
+    })
+  }
+
+  // Vérification des rôles
+  if (requiresRole && isAuthenticated) {
+    if (!authStore.hasRole(requiresRole)) {
+      return next({ name: 'dashboard' })
+    }
+  }
+
+  next()
+})
+
+// Gestion des erreurs de navigation
+router.onError((error) => {
+  console.error('Erreur de navigation:', error)
+  
+  // Si c'est une erreur de chargement de module
+  if (error.message.includes('Failed to fetch dynamically imported module')) {
+    // Recharger la page pour forcer le rechargement des modules
+    window.location.reload()
+  }
+})
+
+export default router

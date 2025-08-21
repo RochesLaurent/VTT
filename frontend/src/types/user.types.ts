@@ -1,91 +1,104 @@
-export interface User {
-  id: number;
-  email: string;
-  username: string;
-  pseudo: string;
-  firstname?: string;
-  lastname?: string;
-  roles: string[];
-  avatar?: string | null;
-  createdAt: string;
-  updatedAt?: string;
-}
-
+/**
+ * Interface pour le profil utilisateur complet
+ */
 export interface UserProfile {
-  id: number;
-  email: string;
-  username: string;
-  pseudo: string;
-  firstname?: string;
-  lastname?: string;
-  avatar?: string | null;
-  createdAt: string;
-  updatedAt?: string;
-  preferences?: UserPreferences;
-  statistics?: UserStatistics;
+  id: number
+  email: string
+  pseudo: string
+  firstname?: string
+  lastname?: string
+  bio?: string
+  avatarUrl?: string
+  roles: string[]
+  notifications?: NotificationPreferences
+  createdAt: string
+  updatedAt: string
+  lastLogin?: string
+  isActive: boolean
+  emailVerified: boolean
 }
 
-export interface UserUpdateData {
-  email?: string;
-  username?: string;
-  pseudo?: string;
-  firstname?: string;
-  lastname?: string;
+/**
+ * Préférences de notification
+ */
+export interface NotificationPreferences {
+  email: boolean
+  gameInvites: boolean
+  newsletter: boolean
 }
 
-export interface PasswordChangeData {
-  currentPassword: string;
-  newPassword: string;
-  confirmPassword: string;
+/**
+ * Données pour la mise à jour du profil
+ */
+export interface UpdateProfileData {
+  firstname?: string
+  lastname?: string
+  pseudo: string
+  email: string
+  bio?: string
+  notifications?: NotificationPreferences
 }
 
-export interface UserPreferences {
-  theme?: 'dark' | 'light' | 'system';
-  language?: 'fr' | 'en';
-  dice_animation?: boolean;
-  auto_roll_damage?: boolean;
-  show_spell_descriptions?: boolean;
-  grid_snap?: boolean;
-  measurement_unit?: 'feet' | 'meters';
+/**
+ * Réponse de l'upload d'avatar
+ */
+export interface UploadAvatarResponse {
+  avatarUrl: string
+  thumbnailUrl?: string
 }
 
-export interface UserStatistics {
-  accountAge: number;
-  lastActivity: string;
-  gamesCreated: number;
-  gamesJoined: number;
-  charactersCreated: number;
-  hoursPlayed?: number;
-  messagesPosted?: number;
-  diceRolled?: number;
-  favoriteSystem?: string;
-  mostPlayedCharacter?: {
-    name: string;
-    class: string;
-    level: number;
-  };
+/**
+ * Données pour le changement de mot de passe
+ */
+export interface ChangePasswordData {
+  currentPassword: string
+  newPassword: string
+  confirmPassword: string
 }
 
-export interface AuthState {
-  user: User | null;
-  token: string | null;
-  refreshToken: string | null;
-  isAuthenticated: boolean;
-  loading: boolean;
-  error: string | null;
+/**
+ * Statistiques utilisateur
+ */
+export interface UserStats {
+  gamesPlayed: number
+  gamesCreated: number
+  totalPlayTime: number
+  favoriteClass: string
+  achievementsUnlocked: number
+  level?: number
+  experience?: number
 }
 
-export interface LoginCredentials {
-  email: string;
-  password: string;
-  rememberMe?: boolean;
+/**
+ * Historique de partie
+ */
+export interface GameHistory {
+  id: number
+  name: string
+  code: string
+  role: 'master' | 'player'
+  status: 'active' | 'finished' | 'paused'
+  lastPlayed: string
+  playTime: number
+  playerCount: number
 }
 
-export interface RegisterData {
-  email: string;
-  username: string;
-  pseudo: string;
-  password: string;
-  confirmPassword: string;
-  acceptTerms: boolean;
+/**
+ * Réponse API générique
+ */
+export interface ApiResponse<T> {
+  success: boolean
+  data: T
+  message?: string
+  errors?: Record<string, string[]>
+}
+
+/**
+ * Erreur API
+ */
+export interface ApiError {
+  code: string
+  message: string
+  details?: Record<string, any>
+  statusCode: number
 }

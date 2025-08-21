@@ -1,121 +1,122 @@
-import { apiClient } from '@/utils/api';
+// frontend/src/services/user.service.ts
+
+import { apiClient } from './api.client'
 import type { 
   UserProfile, 
-  UserUpdateData, 
-  PasswordChangeData, 
-  UserPreferences 
-} from '@/types/user.types';
+  UpdateProfileData, 
+  UploadAvatarResponse,
+  ApiResponse 
+} from '@/types/user.types'
 
 export class UserService {
-  private static readonly AVATAR_MAX_SIZE = 5 * 1024 * 1024; // 5MB
-  private static readonly AVATAR_ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+  private readonly baseUrl = '/api/users'
 
-  static async getProfile(): Promise<UserProfile> {
-    try {
-      const response = await apiClient.get('/users/profile');
-      return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Erreur lors de la récupération du profil');
-    }
+  /**
+   * Récupère le profil de l'utilisateur connecté
+   */
+  async getProfile(): Promise<UserProfile> {
+    const response = await apiClient.get<ApiResponse<UserProfile>>(`${this.baseUrl}/profile`)
+    return response.data.data
   }
 
-  static async updateProfile(data: UserUpdateData): Promise<UserProfile> {
-    try {
-      const response = await apiClient.put('/users/profile', data);
-      return response.data;
-    } catch (error: any) {
-      if (error.response?.status === 422) {
-        throw new Error(error.response.data.message || 'Données invalides');
-      }
-      throw new Error(error.response?.data?.message || 'Erreur lors de la mise à jour du profil');
-    }
+  /**
+   * Met à jour le profil de l'utilisateur
+   */
+  async updateProfile(data: UpdateProfileData): Promise<UserProfile> {
+    const response = await apiClient.put<ApiResponse<UserProfile>>(
+      `${this.baseUrl}/profile`,
+      data
+    )
+    return response.data.data
   }
 
-  static async changePassword(data: PasswordChangeData): Promise<void> {
-    try {
-      await apiClient.put('/users/password', data);
-    } catch (error: any) {
-      if (error.response?.status === 400) {
-        throw new Error('Mot de passe actuel incorrect');
-      }
-      if (error.response?.status === 422) {
-        throw new Error('Le nouveau mot de passe ne respecte pas les critères de sécurité');
-      }
-      throw new Error(error.response?.data?.message || 'Erreur lors du changement de mot de passe');
-    }
-  }
+  /**
+   * Upload un nouvel avatar
+   */
+  async uploadAvatar(file: File): Promise<UploadAvatarResponse> {
+    const formData = new FormData()
+    formData.append('avatar', file)
 
-  static async updatePreferences(preferences: UserPreferences): Promise<UserPreferences> {
-    try {
-      const response = await apiClient.put('/users/preferences', preferences);
-      return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Erreur lors de la mise à jour des préférences');
-    }
-  }
-
-  static async uploadAvatar(file: File): Promise<string> {
-    try {
-      const formData = new FormData();
-      formData.append('avatar', file);
-
-      const response = await apiClient.post('/users/avatar', formData, {
+    const response = await apiClient.post<ApiResponse<UploadAvatarResponse>>(
+      `${this.baseUrl}/avatar`,
+      formData,
+      {
         headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-
-      return response.data.avatarUrl;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Erreur lors du téléchargement de l\'avatar');
-    }
-  }
-
-  static async deleteAvatar(): Promise<void> {
-    try {
-      await apiClient.delete('/users/avatar');
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Erreur lors de la suppression de l\'avatar');
-    }
-  }
-
-  static async deleteAccount(password: string): Promise<void> {
-    try {
-      await apiClient.delete('/users/account', {
-        data: { password }
-      });
-    } catch (error: any) {
-      if (error.response?.status === 400) {
-        throw new Error('Mot de passe incorrect');
+          'Content-Type': 'multipart/form-data'
+        }
       }
-      throw new Error(error.response?.data?.message || 'Erreur lors de la suppression du compte');
-    }
+    )
+    return response.data.data
   }
 
-  static validateAvatarFile(file: File): { valid: boolean; error?: string } {
-    if (!this.AVATAR_ALLOWED_TYPES.includes(file.type)) {
-      return {
-        valid: false,
-        error: 'Format de fichier non supporté. Utilisez JPG, PNG ou WebP.'
-      };
-    }
-
-    if (file.size > this.AVATAR_MAX_SIZE) {
-      return {
-        valid: false,
-        error: 'Le fichier est trop volumineux. Taille maximale : 5MB.'
-      };
-    }
-
-    return { valid: true };
+  /**
+   * Supprime l'avatar de l'utilisateur
+   */
+  async deleteAvatar(): Promise<void> {
+    await apiClient.delete(`${this.baseUrl}/avatar`)
   }
 
-  static createFilePreview(file: File): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
+  /**
+   * Supprime le compte utilisateur
+   */
+  async deleteAccount(): Promise<void> {
+    await apiClient.delete(`${this.baseUrl}/account`)
+  }
+
+  /**
+   * Change le mot de passe de l'utilisateur
+   */
+  async changePassword(data: {
+    currentPassword: string
+    newPassword: string
+    confirmPassword: string
+  }): Promise<void> {
+    await apiClient.put(`${this.baseUrl}/password`, data)
+  }
+
+  /**
+   * Récupère les statistiques de l'utilisateur
+   */
+  async getStats(): Promise<{
+    gamesPlayed: number
+    gamesCreated: number
+    totalPlayTime: number
+    favoriteClass: string
+    achievementsUnlocked: number
+  }> {
+    const response = await apiClient.get<ApiResponse<any>>(`${this.baseUrl}/stats`)
+    return response.data.data
+  }
+
+  /**
+   * Récupère l'historique des parties
+   */
+  async getGamesHistory(params?: {
+    page?: number
+    limit?: number
+    filter?: 'all' | 'active' | 'finished'
+  }): Promise<{
+    games: any[]
+    total: number
+    page: number
+    pages: number
+  }> {
+    const response = await apiClient.get<ApiResponse<any>>(`${this.baseUrl}/games`, {
+      params
+    })
+    return response.data.data
+  }
+
+  /**
+   * Exporte les données utilisateur (RGPD)
+   */
+  async exportData(): Promise<Blob> {
+    const response = await apiClient.get(`${this.baseUrl}/export`, {
+      responseType: 'blob'
+    })
+    return response.data
   }
 }
+
+// Export singleton
+export const userService = new UserService()

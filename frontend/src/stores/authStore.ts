@@ -1,217 +1,159 @@
-import { defineStore } from 'pinia';
-import { ref, computed, readonly } from 'vue';
-import { AuthService } from '@/services/auth.service';
-import type { 
-  User, 
-  LoginCredentials, 
-  RegisterData, 
-  ForgotPasswordData,
-  ResetPasswordData,
-  ApiError
-} from '@/types/auth.types';
+// frontend/src/stores/authStore.ts
+// Ajout de la méthode updateProfile dans le store existant
+
+import { defineStore } from 'pinia'
+import { ref, computed } from 'vue'
+import { authService } from '@/services/auth.service'
+import type { User, LoginCredentials, RegisterData } from '@/types/auth.types'
 
 export const useAuthStore = defineStore('auth', () => {
-  const user = ref<User | null>(null);
-  const token = ref<string | null>(null);
-  const refreshToken = ref<string | null>(null);
-  const isLoading = ref<boolean>(false);
-  const error = ref<string | null>(null);
+  // État existant
+  const user = ref<User | null>(null)
+  const token = ref<string | null>(null)
+  const refreshToken = ref<string | null>(null)
+  const isLoading = ref(false)
+  const error = ref<string | null>(null)
 
-  const isAuthenticated = computed(() => {
-    return !!(user.value && token.value && AuthService.isAuthenticated());
-  });
-
+  // Getters existants
+  const isAuthenticated = computed(() => !!(user.value && token.value))
   const userDisplayName = computed(() => {
-    if (!user.value) return '';
-    return `${user.value.firstname} ${user.value.lastname}`.trim() || user.value.username;
-  });
+    if (!user.value) return ''
+    return `${user.value.firstname || ''} ${user.value.lastname || ''}`.trim() || user.value.pseudo
+  })
+  const hasRole = computed(() => (role: string) => {
+    if (!user.value) return false
+    return user.value.roles.includes(role)
+  })
 
-  const hasRole = computed(() => {
-    return (role: string) => {
-      if (!user.value) return false;
-      return user.value.roles.includes(role);
-    };
-  });
-
+  // Actions existantes
   const login = async (credentials: LoginCredentials): Promise<void> => {
-    isLoading.value = true;
-    error.value = null;
+    isLoading.value = true
+    error.value = null
 
     try {
-      const authResponse = await AuthService.login(credentials);
-      
-      user.value = authResponse.user;
-      token.value = authResponse.token;
-      refreshToken.value = authResponse.refreshToken;
-      
-      error.value = null;
+      const authResponse = await authService.login(credentials)
+      user.value = authResponse.user
+      token.value = authResponse.token
+      refreshToken.value = authResponse.refreshToken
     } catch (err) {
-      const apiError = err as ApiError;
-      error.value = apiError.message;
-      throw err;
+      error.value = err instanceof Error ? err.message : 'Erreur de connexion'
+      throw err
     } finally {
-      isLoading.value = false;
+      isLoading.value = false
     }
-  };
+  }
 
   const register = async (userData: RegisterData): Promise<void> => {
-    isLoading.value = true;
-    error.value = null;
+    isLoading.value = true
+    error.value = null
 
     try {
-      const authResponse = await AuthService.register(userData);
-      
-      user.value = authResponse.user;
-      token.value = authResponse.token;
-      refreshToken.value = authResponse.refreshToken;
-      
-      error.value = null;
+      const authResponse = await authService.register(userData)
+      user.value = authResponse.user
+      token.value = authResponse.token
+      refreshToken.value = authResponse.refreshToken
     } catch (err) {
-      const apiError = err as ApiError;
-      error.value = apiError.message;
-      throw err;
+      error.value = err instanceof Error ? err.message : 'Erreur d\'inscription'
+      throw err
     } finally {
-      isLoading.value = false;
+      isLoading.value = false
     }
-  };
+  }
 
   const logout = async (): Promise<void> => {
-    isLoading.value = true;
-
+    isLoading.value = true
     try {
-      await AuthService.logout();
-    } catch (err) {
-      console.warn('Erreur lors de la déconnexion:', err);
+      await authService.logout()
     } finally {
-      user.value = null;
-      token.value = null;
-      refreshToken.value = null;
-      error.value = null;
-      isLoading.value = false;
+      user.value = null
+      token.value = null
+      refreshToken.value = null
+      isLoading.value = false
     }
-  };
+  }
 
   const fetchProfile = async (): Promise<void> => {
-    if (!AuthService.isAuthenticated()) {
-      return;
-    }
+    if (!token.value) return
 
-    isLoading.value = true;
-    error.value = null;
-
+    isLoading.value = true
     try {
-      const userProfile = await AuthService.getProfile();
-      user.value = userProfile;
-      token.value = AuthService.getToken();
+      user.value = await authService.getProfile()
     } catch (err) {
-      const apiError = err as ApiError;
-      error.value = apiError.message;
-      
-      if (apiError.code === 'UNAUTHORIZED') {
-        await logout();
-      }
-      
-      throw err;
+      error.value = err instanceof Error ? err.message : 'Erreur de chargement du profil'
+      throw err
     } finally {
-      isLoading.value = false;
+      isLoading.value = false
     }
-  };
+  }
 
   const refreshAuth = async (): Promise<void> => {
-    try {
-      const authResponse = await AuthService.refreshToken();
-      
-      user.value = authResponse.user;
-      token.value = authResponse.token;
-      refreshToken.value = authResponse.refreshToken;
-      
-      error.value = null;
-    } catch (err) {
-      const apiError = err as ApiError;
-      error.value = apiError.message;
-      
-      await logout();
-      throw err;
-    }
-  };
-
-  const forgotPassword = async (data: ForgotPasswordData): Promise<string> => {
-    isLoading.value = true;
-    error.value = null;
+    if (!refreshToken.value) throw new Error('Pas de refresh token')
 
     try {
-      const response = await AuthService.forgotPassword(data);
-      return response.message;
+      const authResponse = await authService.refreshToken(refreshToken.value)
+      token.value = authResponse.token
+      refreshToken.value = authResponse.refreshToken
+      user.value = authResponse.user
     } catch (err) {
-      const apiError = err as ApiError;
-      error.value = apiError.message;
-      throw err;
-    } finally {
-      isLoading.value = false;
+      logout()
+      throw err
     }
-  };
+  }
 
-  const resetPassword = async (data: ResetPasswordData): Promise<string> => {
-    isLoading.value = true;
-    error.value = null;
-
-    try {
-      const response = await AuthService.resetPassword(data);
-      return response.message;
-    } catch (err) {
-      const apiError = err as ApiError;
-      error.value = apiError.message;
-      throw err;
-    } finally {
-      isLoading.value = false;
-    }
-  };
-
-  const initialize = async (): Promise<void> => {
-    if (AuthService.isAuthenticated()) {
-      try {
-        await fetchProfile();
-      } catch (err) {
-        console.warn('Erreur lors de l\'initialisation:', err);
-        AuthService.clearAuth();
+  /**
+   * Met à jour le profil utilisateur dans le store
+   * Utilisé pour synchroniser avec les changements du UserStore
+   */
+  const updateProfile = (updatedData: Partial<User>): void => {
+    if (user.value) {
+      user.value = {
+        ...user.value,
+        ...updatedData
       }
     }
-  };
+  }
+
+  const initialize = async (): Promise<void> => {
+    const storedToken = localStorage.getItem('token')
+    const storedRefreshToken = localStorage.getItem('refreshToken')
+
+    if (storedToken && storedRefreshToken) {
+      token.value = storedToken
+      refreshToken.value = storedRefreshToken
+
+      try {
+        await fetchProfile()
+      } catch (err) {
+        console.warn('Session expirée, reconnexion nécessaire')
+        logout()
+      }
+    }
+  }
 
   const clearError = (): void => {
-    error.value = null;
-  };
+    error.value = null
+  }
 
-  const updateProfile = (updatedUser: Partial<User>): void => {
-    if (user.value) {
-      user.value = { ...user.value, ...updatedUser };
-    }
-  };
-
-  // === Retour des propriétés et méthodes ===
   return {
     // État
-    user: readonly(user),
-    token: readonly(token),
-    refreshToken: readonly(refreshToken),
-    isLoading: readonly(isLoading),
-    error: readonly(error),
-    
-    // Computed
+    user: computed(() => user.value),
+    token: computed(() => token.value),
+    isLoading: computed(() => isLoading.value),
+    error: computed(() => error.value),
+
+    // Getters
     isAuthenticated,
     userDisplayName,
     hasRole,
-    
+
     // Actions
     login,
     register,
     logout,
     fetchProfile,
     refreshAuth,
-    forgotPassword,
-    resetPassword,
+    updateProfile, // Nouvelle méthode
     initialize,
-    clearError,
-    updateProfile,
-  };
-});
+    clearError
+  }
+})
